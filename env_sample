@@ -1,0 +1,8 @@
+POSTGRES_DB="iamviewer"
+POSTGRES_USER="iamuser"
+POSTGRES_PASSWORD="iampassword"
+DATABASE_URL="postgresql://iamuser:iampassword@postgres:5432/iamviewer"
+
+# set to false if planning to use LLM
+LLM_DISABLED=false
+GEMINI_API_KEY="REDACTED"

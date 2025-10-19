@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: iam-viewer-postgres
+    environment:
+      POSTGRES_DB: iamviewer
+      POSTGRES_USER: iamuser
+      POSTGRES_PASSWORD: iampassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - aws-iam-viewer-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: iam-viewer-backend
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - aws-iam-viewer-network
+
+  frontend:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    container_name: aws-iam-viewer
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - LLM_DISABLED=${LLM_DISABLED}
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - aws-iam-viewer-network
+
+volumes:
+  postgres_data:
+
+networks:
+  aws-iam-viewer-network:
+    driver: bridge 
